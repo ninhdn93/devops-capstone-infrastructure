@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.local.bak
+secrets/
+node_modules/
+*.log
