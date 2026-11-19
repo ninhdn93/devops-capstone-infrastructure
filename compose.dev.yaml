@@ -21,7 +21,7 @@ services:
       start_period: 15s
 
   backend:
-    image: capstone-backend:baseline
+    image: capstone-backend:hardened
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -38,7 +38,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: capstone-frontend:baseline
+    image: capstone-frontend:hardened
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -52,3 +52,4 @@ services:
 
 volumes:
   postgres_dev_data:
+
