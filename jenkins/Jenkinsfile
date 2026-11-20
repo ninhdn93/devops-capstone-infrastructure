@@ -68,6 +68,15 @@ pipeline {
             }
         }
 
+        stage('Frontend Automated Tests') {
+            steps {
+                dir('frontend') {
+                    echo 'Running Frontend Vitest automated tests...'
+                    sh 'npm test'
+                    echo 'Frontend automated tests PASSED.'
+                }
+            }
+        }
         stage('Backend Automated Tests') {
             steps {
                 dir('backend') {
