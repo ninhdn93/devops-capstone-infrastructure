@@ -61,20 +61,52 @@ pipeline {
 
                 dir('backend') {
                     sh 'test -f dist/server.js'
+                    sh 'test -f dist/app.js'
                 }
 
                 echo 'Frontend and Backend build verification PASSED.'
+            }
+        }
+
+        stage('Backend Automated Tests') {
+            steps {
+                dir('backend') {
+                    echo 'Running Backend Native Node.js Tests...'
+
+                    sh 'npm test'
+
+                    echo 'Backend automated tests PASSED.'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                echo 'Validating CI quality gate...'
+
+                dir('frontend') {
+                    sh 'test -f .next/BUILD_ID'
+                }
+
+                dir('backend') {
+                    sh 'test -f dist/server.js'
+                    sh 'test -f dist/app.js'
+                    sh 'test -f tests/health.node.test.cjs'
+                    sh 'test -f tests/todos.node.test.cjs'
+                }
+
+                echo 'QUALITY GATE PASSED.'
             }
         }
     }
 
     post {
         success {
-            echo 'CAPSTONE CI BUILD SUCCESSFUL'
+            echo 'CAPSTONE CI BUILD AND TESTS SUCCESSFUL'
         }
 
         failure {
-            echo 'CAPSTONE CI BUILD FAILED - Check Console Output.'
+            echo 'CAPSTONE CI FAILED - Check Console Output.'
         }
 
         always {
