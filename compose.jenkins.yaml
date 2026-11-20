@@ -1,0 +1,63 @@
+
+name: capstone-jenkins
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk21
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8085:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=true"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://localhost:8080/login > /dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+
+
+  agent:
+    image: capstone-jenkins-agent:1.0
+    init: true
+    restart: unless-stopped
+
+    entrypoint:
+      - java
+      - -jar
+      - /usr/share/jenkins/agent.jar
+
+    command:
+      - -url
+      - http://jenkins:8080/
+      - -secret
+      - "@/run/secrets/jenkins_agent"
+      - -name
+      - capstone-agent
+      - -webSocket
+      - -workDir
+      - /home/jenkins/agent
+
+    secrets:
+      - jenkins_agent
+
+    volumes:
+      - agent_workspace:/home/jenkins/agent
+
+    depends_on:
+      jenkins:
+        condition: service_healthy
+
+
+volumes:
+  jenkins_home:
+  agent_workspace:
+
+secrets:
+  jenkins_agent:
+    file: ./secrets/jenkins-agent-secret.txt

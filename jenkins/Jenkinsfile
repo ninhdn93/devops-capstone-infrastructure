@@ -1,0 +1,84 @@
+pipeline {
+    agent {
+        label 'capstone'
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        CI = 'true'
+    }
+
+    stages {
+        stage('Checkout Frontend') {
+            steps {
+                dir('frontend') {
+                    git branch: 'master',
+                        url: 'https://github.com/ninhdn93/devops-bootcamp-todolist-frontend.git'
+                }
+            }
+        }
+
+        stage('Checkout Backend') {
+            steps {
+                dir('backend') {
+                    git branch: 'master',
+                        url: 'https://github.com/ninhdn93/devops-bootcamp-todolist-backend-api.git'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'node --version'
+                    sh 'npm --version'
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                dir('backend') {
+                    sh 'node --version'
+                    sh 'npm --version'
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Verification') {
+            steps {
+                dir('frontend') {
+                    sh 'test -f .next/BUILD_ID'
+                }
+
+                dir('backend') {
+                    sh 'test -f dist/server.js'
+                }
+
+                echo 'Frontend and Backend build verification PASSED.'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CAPSTONE CI BUILD SUCCESSFUL'
+        }
+
+        failure {
+            echo 'CAPSTONE CI BUILD FAILED - Check Console Output.'
+        }
+
+        always {
+            echo "Pipeline completed: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+        }
+    }
+}
